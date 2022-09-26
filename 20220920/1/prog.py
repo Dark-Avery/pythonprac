@@ -1,8 +1,11 @@
 a = eval(input())
-if a % 25 == 0 and a % 2 == 0:
-    s = "A + B - "
+if a % 25 == 0:
+    if a % 2 == 0:
+        s = "A + B - "
+    else:
+        s = "A - B + "
 else:
-    s = "A - B + "
+    s = "A - B - "
 if a % 8 == 0:
     s += "C +"
 else:
