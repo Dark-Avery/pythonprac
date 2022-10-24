@@ -1,0 +1,5 @@
+:sin1 sin(1)
+sin1
+:decorate "--<<{}>>--".format("UraUra")
+decorate
+quit "все будет хорошо!! {}, {}"

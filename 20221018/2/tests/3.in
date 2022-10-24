@@ -1,0 +1,6 @@
+:sin x y sin(x+y)
+sin 1 -2
+:decorate s w "--<<{},{}>>--".format(s,w)
+decorate "ЖЖЖ" "УУУ"
+sin 0 1
+quit "все будет хорошо!! {}, {}"
