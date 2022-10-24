@@ -1,12 +1,14 @@
-wall = input()
-gas = 0
-liq = 0
-wid = 2
-while (inp := input()) != wall:
-    gas += sum(1 for i in inp if i == '.')
-    liq += sum(1 for i in inp if i == '~')
-    wid += 1
-
+try:
+    wall = input()
+    gas = 0
+    liq = 0
+    wid = 2
+    while (inp := input()) != wall:
+        gas += sum(1 for i in inp if i == '.')
+        liq += sum(1 for i in inp if i == '~')
+        wid += 1
+except EOFError:
+    pass
 print('#' * wid)
 liq_r = (liq + wid - 3) // (wid - 2)
 gas_r = len(wall) - 2 - liq_r
