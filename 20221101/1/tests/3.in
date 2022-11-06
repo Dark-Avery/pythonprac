@@ -1,0 +1,8 @@
+c = Omnibus()
+c.a = 10
+c.b = 20
+cl = Omnibus()
+cl.a = 30
+cl.d = 40
+del cl.random
+print(c.a, c.b, cl.a, cl.d)

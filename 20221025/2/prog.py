@@ -1,5 +1,7 @@
+import sys
 from itertools import islice
 from itertools import tee
+
 
 def slide(seq, n):
     s = seq
@@ -12,5 +14,5 @@ def slide(seq, n):
         yield from win
         next(s)
 
-import sys
+
 exec(sys.stdin.read())
