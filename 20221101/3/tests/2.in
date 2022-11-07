@@ -1,0 +1,9 @@
+a, b = Grange(1, 10, 100000), Grange(1, 5, 1)
+print(f"{len(a)=}, {len(b)=}")
+print(f"{list(a)}({not(a)}), {list(b)}({not(b)})")
+print(f"{a=}, {b=}")
+print(f"{len(list(a))=}, {len(list(b))=}")
+print(f"{a[5]=}, {a[21]=}")
+a, b = a[1000:100000], a[1000:100000:2]
+print(f"{a=}, {a[7]=}")
+print(f"{b=}, {b[8]=}, {list(b)=}")
