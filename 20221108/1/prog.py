@@ -1,7 +1,8 @@
 import collections
+import sys
 
 
-class DivStr(collections.Userstring):
+class DivStr(collections.UserString):
     def __init__(self, seq=""):
         super().__init__(seq)
 
@@ -11,5 +12,7 @@ class DivStr(collections.Userstring):
 
     def __mod__(self, other):
         n = len(self) % other
-        return self[-n:0]
+        return self[-n:]
 
+
+exec(sys.stdin.read())
