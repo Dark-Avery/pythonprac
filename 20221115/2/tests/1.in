@@ -1,0 +1,13 @@
+class C:
+    num = Num()
+
+
+print(C().num)
+c, d, e = C(), C(), C()
+c.num = d.num = 2
+e.num = 1
+print(c.num + d.num + e.num)
+c.num = "qwerqwerqwer"
+print(c.num + d.num + e.num)
+d.num = range(0, 1000, 1)
+print(c.num + d.num + e.num)

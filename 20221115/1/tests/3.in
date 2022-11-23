@@ -1,0 +1,17 @@
+@objcount
+class C:
+    def __init__(self):
+        self.var = 100500
+
+    def __del__(self):
+        del self.var
+        pass
+
+
+c, d, e, f = C(), C(), C(), C()
+print(C.counter)
+c = 100500
+print(C.counter)
+f = dir()
+e = 100500
+print(C.counter)
