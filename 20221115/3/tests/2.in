@@ -1,0 +1,22 @@
+try:
+	a = Alpha(aa = 3)
+except AttributeError:
+	print('No aa')
+
+try:
+    a = AlphaQ(bb = 3)
+except AttributeError:
+    print('No bb')
+
+a = Alpha(a = 3)
+b = AlphaQ(b = 3)
+
+try:
+	print(a.b)
+except AttributeError:
+	print('No a.b')
+
+try:
+    print(b.a)
+except AttributeError:
+    print('No b.a')

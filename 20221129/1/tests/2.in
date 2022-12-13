@@ -1,0 +1,14 @@
+class C(metaclass=dump):
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+    def add(self, *args, **kwargs):
+        self.args = self.args + args
+        self.kwargs.update(kwargs)
+        return self.args, self.kwargs
+
+
+c = C(10, a=42)
+print(c.add(11, b=100500))
+print(c.add(42, c=[1, 2, 3]))
