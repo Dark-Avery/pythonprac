@@ -95,5 +95,11 @@ class Dungeon:
                     print("Invalid command")
 
 
-dungeon = Dungeon((10, 10))
-dungeon.play()
+def main():
+    print("<<< Welcome to Python-MUD 0.1 >>>")
+    dungeon = Dungeon((10, 10))
+    dungeon.play()
+
+
+if __name__ == '__main__':
+    main()
