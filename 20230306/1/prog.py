@@ -170,8 +170,11 @@ class Dungeon(cmd.Cmd):
         if len(string) < 2:
             string += [""] * (2 - len(string))
         match [prefix, string[-1], string[-2]]:
-            case [prefix, "with", _]:
+            case [prefix, "with", _] if not prefix:
                 return list(Dungeon.WEAPONS.keys())
+            case [prefix, _, "with"] if prefix:
+                return [weapon for weapon in Dungeon.WEAPONS if weapon.startswith(prefix)]
+
             case _:
                 return []
 
