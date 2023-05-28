@@ -16,10 +16,11 @@ class Player:
 
 
 class Dungeon(cmd.Cmd):
+    MONSTER_EXT = set(list_cows())
     add_list_cows = {"jgsbat"}
+    MONSTERS = MONSTER_EXT | add_list_cows
     player = Player((0, 0))
     WEAPONS = {"sword": 10, "spear": 15, "axe": 20}
-    DEFAULT_DAMAGE = 10
 
     def __init__(self, size, *args, **kwarks):
         self.size = size
@@ -35,9 +36,9 @@ class Dungeon(cmd.Cmd):
 
     def display_monster(self, monster):
         image = None
-        if monster.name in list_cows():
+        if monster.name in self.MONSTER_EXT:
             image = cowsay(monster.greeting, cow=monster.name)
-        if monster.name in Dungeon.add_list_cows:
+        if monster.name in self.add_list_cows:
             filename = f"{monster.name}.cow"
             with open(filename, "r") as cowfile:
                 image = cowsay(monster.greeting, cowfile=read_dot_cow(cowfile))
@@ -118,7 +119,7 @@ class Dungeon(cmd.Cmd):
             name, greeting, hp, x, y = self.ParseArgs(params)
             if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
                 raise SyntaxError
-            elif name not in list_cows() and name not in self.add_list_cows:
+            elif name not in self.MONSTERS:
                 raise NameError
             else:
                 match self.field[x][y]:
@@ -156,11 +157,23 @@ class Dungeon(cmd.Cmd):
         coords = self.player.position
         match shlex.split(args):
             case []:
-                self.Attack(coords, self.DEFAULT_DAMAGE)
-            case ["with", weapon]:
+                self.Attack(coords, self.WEAPONS['sword'])
+            case ["with", weapon] if weapon in self.WEAPONS:
                 self.Attack(coords, self.WEAPONS[weapon])
+            case ["with", _]:
+                print("Unknown weapon")
             case _:
                 print("Wrong args for attack")
+
+    def complete_attack(self, prefix, string, start, end):
+        string = shlex.split(string)
+        if len(string) < 2:
+            string += [""] * (2 - len(string))
+        match [prefix, string[-1], string[-2]]:
+            case [prefix, "with", _]:
+                return list(Dungeon.WEAPONS.keys())
+            case _:
+                return []
 
 
 def main():
