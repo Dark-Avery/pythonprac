@@ -23,9 +23,8 @@ class Dungeon:
 
     def encounter(self, player):
         if isinstance(self.field[player.position[0]][player.position[1]], Monster):
-            print(cowsay(self.field[player.position[0]][player.position[1]].greeting))
-            # print(cowsay(self.field[player.position[0]][player.position[1]].greeting,
-            #       cow=self.field[player.position[0]][player.position[1]].name))
+            print(cowsay(self.field[player.position[0]][player.position[1]].greeting,
+                  cow=self.field[player.position[0]][player.position[1]].name))
 
     def MoveMessage(self, player):
         print(f'Moved to {player.position}')
