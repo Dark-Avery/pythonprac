@@ -3,7 +3,8 @@ import shlex
 
 
 class Monster:
-    def __init__(self, name, greeting):
+    def __init__(self, name, greeting, hp):
+        self.hp = hp
         self.name = name
         self.greeting = greeting
 
@@ -61,6 +62,31 @@ class Dungeon:
         self.MoveMessage(player)
         self.encounter(player)
 
+    def ParseArgs(self, args: list[str]):
+        if len(args) != 8 or "hello" not in args or "hp" not in args or "coords" not in args:
+            raise SyntaxError
+        monster_name = args[0]
+        keywords = args[1:]
+        while keywords:
+            match keywords:
+                case ["hello", greeting, *_]:
+                    monster_greeting = greeting
+                    keywords = keywords[2:]
+                case ["hp", hp, *_]:
+                    if not hp.isdigit():
+                        raise ValueError
+                    monster_hp = int(hp)
+                    keywords = keywords[2:]
+                case ["coords", x, y, *_]:
+                    if not x.isdigit() or not y.isdigit():
+                        raise ValueError
+                    monster_x = int(x)
+                    monster_y = int(y)
+                    keywords = keywords[3:]
+                case _:
+                    raise SyntaxError
+        return monster_name, monster_greeting, monster_hp, monster_x, monster_y
+
     def play(self):
         player = Player((0, 0))
         while s := input():
@@ -73,24 +99,30 @@ class Dungeon:
                     self.MoveUp(player)
                 case ['down']:
                     self.MoveDown(player)
-                case ['addmon', name, x, y, greeting]:
-                    x = int(x)
-                    y = int(y)
-                    if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
+                case ['addmon', *args]:
+                    try:
+                        name, greeting, hp, x, y = self.ParseArgs(args)
+                        if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
+                            raise SyntaxError
+                        elif name not in list_cows() and name not in self.add_list_cows:
+                            raise NameError
+                        else:
+                            match self.field[x][y]:
+                                case Monster():
+                                    self.field[x][y] = Monster(name, greeting, hp)
+                                    print(
+                                        f"Added monster {name} to ({x}, {y}) saying {greeting}")
+                                    print("Replaced the old monster")
+                                case _:
+                                    self.field[x][y] = Monster(name, greeting, hp)
+                                    print(
+                                        f"Added monster {name} to ({x}, {y}) saying {greeting}")
+                    except SyntaxError:
                         print("Invalid arguments")
-                    elif name not in list_cows() and name not in self.add_list_cows:
+                    except NameError:
                         print("Cannot add unknown monster")
-                    else:
-                        match self.field[x][y]:
-                            case Monster():
-                                self.field[x][y] = Monster(name, greeting)
-                                print(
-                                    f"Added monster {name} to ({x}, {y}) saying {greeting}")
-                                print("Replaced the old monster")
-                            case _:
-                                self.field[x][y] = Monster(name, greeting)
-                                print(
-                                    f"Added monster {name} to ({x}, {y}) saying {greeting}")
+                    except ValueError:
+                        print("HP and coords should be a digit")
                 case _:
                     print("Invalid command")
 
