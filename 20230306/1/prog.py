@@ -158,15 +158,21 @@ class Dungeon(cmd.Cmd):
         match shlex.split(args):
             case []:
                 self.Attack(coords, self.WEAPONS['sword'])
+            case [monster_name, "with", weapon] if weapon in self.WEAPONS:
+                monster = self.field[coords[0]][coords[1]]
+                if monster.name == monster_name:
+                    self.Attack(coords, self.WEAPONS['sword'])
+                else:
+                    print(f"No {monster_name} here")
             case [monster_name]:
                 monster = self.field[coords[0]][coords[1]]
                 if monster.name == monster_name:
-                    self.attack_monster(coords, self.WEAPONS['sword'])
+                    self.Attack(coords, self.WEAPONS['sword'])
                 else:
                     print(f"No {monster_name} here")
             case ["with", weapon] if weapon in self.WEAPONS:
                 self.Attack(coords, self.WEAPONS[weapon])
-            case ["with", _]:
+            case [*_, "with", _]:
                 print("Unknown weapon")
             case _:
                 print("Wrong args for attack")
