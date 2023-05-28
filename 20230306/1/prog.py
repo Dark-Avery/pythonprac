@@ -16,8 +16,11 @@ class Player:
 
 
 class Dungeon(cmd.Cmd):
+    MONSTERS_EXT = set(list_cows())
     add_list_cows = {"jgsbat"}
+    MONSTERS = MONSTERS_EXT | add_list_cows
     player = Player((0, 0))
+
 
     def __init__(self, size, *args, **kwarks):
         self.size = size
@@ -33,9 +36,9 @@ class Dungeon(cmd.Cmd):
 
     def display_monster(self, monster):
         image = None
-        if monster.name in list_cows():
+        if monster.name in self.MONSTERS_EXT:
             image = cowsay(monster.greeting, cow=monster.name)
-        if monster.name in Dungeon.add_list_cows:
+        if monster.name in self.add_list_cows:
             filename = f"{monster.name}.cow"
             with open(filename, "r") as cowfile:
                 image = cowsay(monster.greeting, cowfile=read_dot_cow(cowfile))
@@ -116,7 +119,7 @@ class Dungeon(cmd.Cmd):
             name, greeting, hp, x, y = self.ParseArgs(params)
             if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
                 raise SyntaxError
-            elif name not in list_cows() and name not in self.add_list_cows:
+            elif name not in self.MONSTERS:
                 raise NameError
             else:
                 match self.field[x][y]:
@@ -148,15 +151,30 @@ class Dungeon(cmd.Cmd):
             print(f"{monster.name} now has {monster.hp}")
 
     def do_attack(self, args):
-        if len(args) > 0:
-            print("Wrong argemunts")
-            return
         if not self.isMonster():
             print("No monster here")
-        else:
-            damage = 10
-            coords = self.player.position
-            self.Attack(coords, damage)
+        coords = self.player.position
+        match shlex.split(args):
+            case []:
+                self.Attack(coords, 10)
+            case [monster_name]:
+                monster = self.field[coords[0]][coords[1]]
+                if monster.name == monster_name:
+                    self.attack_monster(coords, 10)
+                else:
+                    print(f"No {monster_name} here")
+            case _:
+                print("Wrong parameters for attack command")
+
+    def complete_attack(self, prefix, string, start, end):
+        string = shlex.split(string)
+        if len(string) < 2:
+            string += [""] * (2 - len(string))
+        match [prefix, string[-1], string[-2]]:
+            case [prefix, "attack", _]:
+                return list(self.MONSTERS)
+            case _:
+                return []
 
 
 def main():
