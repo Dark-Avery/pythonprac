@@ -19,9 +19,10 @@ class Dungeon(cmd.Cmd):
     add_list_cows = {"jgsbat"}
     player = Player((0, 0))
 
-    def __init__(self, size):
+    def __init__(self, size, *args, **kwarks):
         self.size = size
         self.field = [[None] * size[0] for _ in range(size[1])]
+        super().__init__(*args, **kwarks)
 
     def NewPos(self, player, x, y):
         return ((player.position[0] + x) % self.size[0],
@@ -40,9 +41,14 @@ class Dungeon(cmd.Cmd):
                 image = cowsay(monster.greeting, cowfile=read_dot_cow(cowfile))
         print(image)
 
-    def encounter(self, player):
-        if isinstance(self.field[player.position[0]][player.position[1]], Monster):
-            self.display_monster(self.field[player.position[0]][player.position[1]])
+    def isMonster(self):
+        coords = self.player.position
+        return isinstance(self.field[coords[0]][coords[1]], Monster)
+
+    def encounter(self):
+        if self.isMonster():
+            coords = self.player.position
+            self.display_monster(self.field[coords[0]][coords[1]])
 
     def MoveMessage(self, player):
         print(f'Moved to {player.position}')
@@ -53,7 +59,7 @@ class Dungeon(cmd.Cmd):
             return
         self.player.position = self.NewPos(self.player, -1, 0)
         self.MoveMessage(self.player)
-        self.encounter(self.player)
+        self.encounter()
 
     def do_right(self, args):
         if len(args) > 0:
@@ -61,7 +67,7 @@ class Dungeon(cmd.Cmd):
             return
         self.player.position = self.NewPos(self.player, 1, 0)
         self.MoveMessage(self.player)
-        self.encounter(self.player)
+        self.encounter()
 
     def do_up(self, args):
         if len(args) > 0:
@@ -69,7 +75,7 @@ class Dungeon(cmd.Cmd):
             return
         self.player.position = self.NewPos(self.player, 0, 1)
         self.MoveMessage(self.player)
-        self.encounter(self.player)
+        self.encounter()
 
     def do_down(self, args):
         if len(args) > 0:
@@ -77,7 +83,7 @@ class Dungeon(cmd.Cmd):
             return
         self.player.position = self.NewPos(self.player, 0, -1)
         self.MoveMessage(self.player)
-        self.encounter(self.player)
+        self.encounter()
 
     def ParseArgs(self, args: list[str]):
         if len(args) != 8 or "hello" not in args or "hp" not in args or "coords" not in args:
@@ -103,10 +109,11 @@ class Dungeon(cmd.Cmd):
                 case _:
                     raise SyntaxError
         return monster_name, monster_greeting, monster_hp, monster_x, monster_y
-    
+
     def do_addmon(self, args):
         try:
-            name, greeting, hp, x, y = self.ParseArgs(args)
+            params = shlex.split(args)
+            name, greeting, hp, x, y = self.ParseArgs(params)
             if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
                 raise SyntaxError
             elif name not in list_cows() and name not in self.add_list_cows:
@@ -128,6 +135,24 @@ class Dungeon(cmd.Cmd):
             print("Cannot add unknown monster")
         except ValueError:
             print("HP and coords should be a digit")
+
+    def do_attack(self, args):
+        if len(args) > 0:
+            print("Wrong argemunts")
+            return
+        if not self.isMonster():
+            print("No monster here")
+        else:
+            coords = self.player.position
+            monster = self.field[coords[0]][coords[1]]
+            damage = min(10, monster.hp)
+            print(f"Attacked {monster.name}, damage {damage} hp")
+            monster.hp -= damage
+            if monster.hp == 0:
+                print(f"{monster.name} died")
+                self.field[coords[0]][coords[1]] = None
+            else:
+                print(f"{monster.name} now has {monster.hp}")
 
 
 def main():
