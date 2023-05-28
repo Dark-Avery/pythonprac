@@ -136,6 +136,17 @@ class Dungeon(cmd.Cmd):
         except ValueError:
             print("HP and coords should be a digit")
 
+    def Attack(self, coords, damage):
+        monster = self.field[coords[0]][coords[1]]
+        dmg = min(damage, monster.hp)
+        print(f"Attacked {monster.name}, damage {dmg} hp")
+        monster.hp -= dmg
+        if monster.hp == 0:
+            print(f"{monster.name} died")
+            self.field[coords[0]][coords[1]] = None
+        else:
+            print(f"{monster.name} now has {monster.hp}")
+
     def do_attack(self, args):
         if len(args) > 0:
             print("Wrong argemunts")
@@ -143,16 +154,9 @@ class Dungeon(cmd.Cmd):
         if not self.isMonster():
             print("No monster here")
         else:
+            damage = 10
             coords = self.player.position
-            monster = self.field[coords[0]][coords[1]]
-            damage = min(10, monster.hp)
-            print(f"Attacked {monster.name}, damage {damage} hp")
-            monster.hp -= damage
-            if monster.hp == 0:
-                print(f"{monster.name} died")
-                self.field[coords[0]][coords[1]] = None
-            else:
-                print(f"{monster.name} now has {monster.hp}")
+            self.Attack(coords, damage)
 
 
 def main():
