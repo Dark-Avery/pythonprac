@@ -1,4 +1,4 @@
-from cowsay import cowsay, list_cows
+from cowsay import cowsay, list_cows, read_dot_cow
 
 
 class Monster:
@@ -13,6 +13,8 @@ class Player:
 
 
 class Dungeon:
+    add_list_cows = {"jgsbat"}
+
     def __init__(self, size):
         self.size = size
         self.field = [[None] * size[0] for _ in range(size[1])]
@@ -21,10 +23,19 @@ class Dungeon:
         return ((player.position[0] + x) % self.size[0],
                 (player.position[1] + y) % self.size[1])
 
+    def display_monster(self, monster):
+        image = None
+        if monster.name in list_cows():
+            image = cowsay(monster.greeting, cow=monster.name)
+        if monster.name in Dungeon.add_list_cows:
+            filename = f"{monster.name}.cow"
+            with open(filename, "r") as cowfile:
+                image = cowsay(monster.greeting, cowfile=read_dot_cow(cowfile))
+        print(image)
+
     def encounter(self, player):
         if isinstance(self.field[player.position[0]][player.position[1]], Monster):
-            print(cowsay(self.field[player.position[0]][player.position[1]].greeting,
-                  cow=self.field[player.position[0]][player.position[1]].name))
+            self.display_monster(self.field[player.position[0]][player.position[1]])
 
     def MoveMessage(self, player):
         print(f'Moved to {player.position}')
@@ -67,7 +78,7 @@ class Dungeon:
                     y = int(y)
                     if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
                         print("Invalid arguments")
-                    elif name not in list_cows():
+                    elif name not in list_cows() and name not in self.add_list_cows:
                         print("Cannot add unknown monster")
                     else:
                         match self.field[x][y]:
