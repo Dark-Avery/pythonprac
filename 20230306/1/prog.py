@@ -21,7 +21,6 @@ class Dungeon(cmd.Cmd):
     MONSTERS = MONSTERS_EXT | add_list_cows
     player = Player((0, 0))
 
-
     def __init__(self, size, *args, **kwarks):
         self.size = size
         self.field = [[None] * size[0] for _ in range(size[1])]
@@ -153,6 +152,7 @@ class Dungeon(cmd.Cmd):
     def do_attack(self, args):
         if not self.isMonster():
             print("No monster here")
+            return
         coords = self.player.position
         match shlex.split(args):
             case []:
@@ -171,8 +171,10 @@ class Dungeon(cmd.Cmd):
         if len(string) < 2:
             string += [""] * (2 - len(string))
         match [prefix, string[-1], string[-2]]:
-            case [prefix, "attack", _]:
-                return list(self.MONSTERS)
+            case [prefix, "attack", _] if not prefix:
+                return list(Dungeon.MONSTERS)
+            case [prefix, _, "attack"]:
+                return [monster for monster in Dungeon.MONSTERS if monster.startswith(prefix)]
             case _:
                 return []
 
