@@ -1,4 +1,5 @@
 from cowsay import cowsay, list_cows, read_dot_cow
+import shlex
 
 
 class Monster:
@@ -62,9 +63,8 @@ class Dungeon:
 
     def play(self):
         player = Player((0, 0))
-        while True:
-            s = input()
-            match s.split():
+        while s := input():
+            match shlex.split(s):
                 case ['left']:
                     self.MoveLeft(player)
                 case ['right']:
