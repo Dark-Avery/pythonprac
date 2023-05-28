@@ -1,5 +1,6 @@
 from cowsay import cowsay, list_cows, read_dot_cow
 import shlex
+import cmd
 
 
 class Monster:
@@ -14,8 +15,9 @@ class Player:
         self.position = position
 
 
-class Dungeon:
+class Dungeon(cmd.Cmd):
     add_list_cows = {"jgsbat"}
+    player = Player((0, 0))
 
     def __init__(self, size):
         self.size = size
@@ -24,6 +26,9 @@ class Dungeon:
     def NewPos(self, player, x, y):
         return ((player.position[0] + x) % self.size[0],
                 (player.position[1] + y) % self.size[1])
+
+    def do_exit(self, args):
+        return True
 
     def display_monster(self, monster):
         image = None
@@ -42,25 +47,37 @@ class Dungeon:
     def MoveMessage(self, player):
         print(f'Moved to {player.position}')
 
-    def MoveLeft(self, player):
-        player.position = self.NewPos(player, -1, 0)
-        self.MoveMessage(player)
-        self.encounter(player)
+    def do_left(self, args):
+        if len(args) > 0:
+            print("Wrong argemunts")
+            return
+        self.player.position = self.NewPos(self.player, -1, 0)
+        self.MoveMessage(self.player)
+        self.encounter(self.player)
 
-    def MoveRight(self, player):
-        player.position = self.NewPos(player, 1, 0)
-        self.MoveMessage(player)
-        self.encounter(player)
+    def do_right(self, args):
+        if len(args) > 0:
+            print("Wrong argemunts")
+            return
+        self.player.position = self.NewPos(self.player, 1, 0)
+        self.MoveMessage(self.player)
+        self.encounter(self.player)
 
-    def MoveUp(self, player):
-        player.position = self.NewPos(player, 0, 1)
-        self.MoveMessage(player)
-        self.encounter(player)
+    def do_up(self, args):
+        if len(args) > 0:
+            print("Wrong argemunts")
+            return
+        self.player.position = self.NewPos(self.player, 0, 1)
+        self.MoveMessage(self.player)
+        self.encounter(self.player)
 
-    def MoveDown(self, player):
-        player.position = self.NewPos(player, 0, -1)
-        self.MoveMessage(player)
-        self.encounter(player)
+    def do_down(self, args):
+        if len(args) > 0:
+            print("Wrong argemunts")
+            return
+        self.player.position = self.NewPos(self.player, 0, -1)
+        self.MoveMessage(self.player)
+        self.encounter(self.player)
 
     def ParseArgs(self, args: list[str]):
         if len(args) != 8 or "hello" not in args or "hp" not in args or "coords" not in args:
@@ -86,51 +103,37 @@ class Dungeon:
                 case _:
                     raise SyntaxError
         return monster_name, monster_greeting, monster_hp, monster_x, monster_y
-
-    def play(self):
-        player = Player((0, 0))
-        while s := input():
-            match shlex.split(s):
-                case ['left']:
-                    self.MoveLeft(player)
-                case ['right']:
-                    self.MoveRight(player)
-                case ['up']:
-                    self.MoveUp(player)
-                case ['down']:
-                    self.MoveDown(player)
-                case ['addmon', *args]:
-                    try:
-                        name, greeting, hp, x, y = self.ParseArgs(args)
-                        if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
-                            raise SyntaxError
-                        elif name not in list_cows() and name not in self.add_list_cows:
-                            raise NameError
-                        else:
-                            match self.field[x][y]:
-                                case Monster():
-                                    self.field[x][y] = Monster(name, greeting, hp)
-                                    print(
-                                        f"Added monster {name} to ({x}, {y}) saying {greeting}")
-                                    print("Replaced the old monster")
-                                case _:
-                                    self.field[x][y] = Monster(name, greeting, hp)
-                                    print(
-                                        f"Added monster {name} to ({x}, {y}) saying {greeting}")
-                    except SyntaxError:
-                        print("Invalid arguments")
-                    except NameError:
-                        print("Cannot add unknown monster")
-                    except ValueError:
-                        print("HP and coords should be a digit")
-                case _:
-                    print("Invalid command")
+    
+    def do_addmon(self, args):
+        try:
+            name, greeting, hp, x, y = self.ParseArgs(args)
+            if x >= self.size[0] or x < 0 or y >= self.size[1] or y < 0:
+                raise SyntaxError
+            elif name not in list_cows() and name not in self.add_list_cows:
+                raise NameError
+            else:
+                match self.field[x][y]:
+                    case Monster():
+                        self.field[x][y] = Monster(name, greeting, hp)
+                        print(
+                            f"Added monster {name} to ({x}, {y}) saying {greeting}")
+                        print("Replaced the old monster")
+                    case _:
+                        self.field[x][y] = Monster(name, greeting, hp)
+                        print(
+                            f"Added monster {name} to ({x}, {y}) saying {greeting}")
+        except SyntaxError:
+            print("Invalid arguments")
+        except NameError:
+            print("Cannot add unknown monster")
+        except ValueError:
+            print("HP and coords should be a digit")
 
 
 def main():
     print("<<< Welcome to Python-MUD 0.1 >>>")
-    dungeon = Dungeon((10, 10))
-    dungeon.play()
+    dungeon = Dungeon((10, 10), completekey='tab')
+    dungeon.cmdloop()
 
 
 if __name__ == '__main__':
