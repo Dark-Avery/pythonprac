@@ -18,6 +18,8 @@ class Player:
 class Dungeon(cmd.Cmd):
     add_list_cows = {"jgsbat"}
     player = Player((0, 0))
+    WEAPONS = {"sword": 10, "spear": 15, "axe": 20}
+    DEFAULT_DAMAGE = 10
 
     def __init__(self, size, *args, **kwarks):
         self.size = size
@@ -148,15 +150,17 @@ class Dungeon(cmd.Cmd):
             print(f"{monster.name} now has {monster.hp}")
 
     def do_attack(self, args):
-        if len(args) > 0:
-            print("Wrong argemunts")
-            return
         if not self.isMonster():
             print("No monster here")
-        else:
-            damage = 10
-            coords = self.player.position
-            self.Attack(coords, damage)
+            return
+        coords = self.player.position
+        match shlex.split(args):
+            case []:
+                self.Attack(coords, self.DEFAULT_DAMAGE)
+            case ["with", weapon]:
+                self.Attack(coords, self.WEAPONS[weapon])
+            case _:
+                print("Wrong args for attack")
 
 
 def main():
