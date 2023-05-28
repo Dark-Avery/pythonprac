@@ -16,9 +16,9 @@ class Player:
 
 
 class Dungeon(cmd.Cmd):
-    MONSTER_EXT = set(list_cows())
+    MONSTERS_EXT = set(list_cows())
     add_list_cows = {"jgsbat"}
-    MONSTERS = MONSTER_EXT | add_list_cows
+    MONSTERS = MONSTERS_EXT | add_list_cows
     player = Player((0, 0))
     WEAPONS = {"sword": 10, "spear": 15, "axe": 20}
 
@@ -36,7 +36,7 @@ class Dungeon(cmd.Cmd):
 
     def display_monster(self, monster):
         image = None
-        if monster.name in self.MONSTER_EXT:
+        if monster.name in self.MONSTERS_EXT:
             image = cowsay(monster.greeting, cow=monster.name)
         if monster.name in self.add_list_cows:
             filename = f"{monster.name}.cow"
@@ -158,6 +158,12 @@ class Dungeon(cmd.Cmd):
         match shlex.split(args):
             case []:
                 self.Attack(coords, self.WEAPONS['sword'])
+            case [monster_name]:
+                monster = self.field[coords[0]][coords[1]]
+                if monster.name == monster_name:
+                    self.attack_monster(coords, self.WEAPONS['sword'])
+                else:
+                    print(f"No {monster_name} here")
             case ["with", weapon] if weapon in self.WEAPONS:
                 self.Attack(coords, self.WEAPONS[weapon])
             case ["with", _]:
@@ -174,7 +180,10 @@ class Dungeon(cmd.Cmd):
                 return list(Dungeon.WEAPONS.keys())
             case [prefix, _, "with"] if prefix:
                 return [weapon for weapon in Dungeon.WEAPONS if weapon.startswith(prefix)]
-
+            case [prefix, "attack", _] if not prefix:
+                return list(Dungeon.MONSTERS)
+            case [prefix, _, "attack"]:
+                return [monster for monster in Dungeon.MONSTERS if monster.startswith(prefix)]
             case _:
                 return []
 
