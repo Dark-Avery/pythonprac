@@ -31,7 +31,7 @@ WEAPONS = {
 class Client:
 
     """
-    A client object, representing a player in a multiplayer Dungeon. Each client has a name, address, hero object, and writer
+    A client object, representing a player in a multiplayer Game. Each client has a name, address, hero object, and writer
     object for sending messages to other clients.
 
     Attributes:
@@ -114,7 +114,7 @@ class Client:
 
 class Monster:
     """
-    A monster object, representing an enemy character in a multiplayer Dungeon.
+    A monster object, representing an enemy character in a multiplayer Game.
 
     Attributes:
         monsters: (dict) - A class-level dictionary mapping monsters names to monsters objects.
@@ -157,17 +157,16 @@ class Monster:
         return self.name, self.msg, self.coords
 
 
-class Dungeon:
+class Game:
     """
-    Dungeon class for MOOD.
+    Game class for MOOD.
 
     Attributes:
         ways (dict): dictionary of possible directions
-        field (list): Dungeon field
+        field (list): Game field
 
     """
-    def __init__(self):
-        self.field = [[None] * 10 for _ in range(10)]
+    field = [[None] * 10 for _ in range(10)]
 
     ways = {
         "up": (0, 1),
@@ -179,7 +178,7 @@ class Dungeon:
     @staticmethod
     def add_monster(monster: Optional[Monster]) -> Tuple[MonsterMeta, bool]:
         """
-        Adds monster to the Dungeon field
+        Adds monster to the Game field
 
         :param monster: (Monster) monster instance
         :return: (Tuple[MonsterMeta, bool]) monster name, message and coordinates and replacing flag
@@ -188,10 +187,10 @@ class Dungeon:
         x, y = monster.coords
         flag = False
 
-        if Dungeon.field[x][y]:
+        if Game.field[x][y]:
             flag = True
 
-        Dungeon.field[x][y] = monster
+        Game.field[x][y] = monster
 
         return monster.meta(), flag
 
@@ -205,7 +204,7 @@ class Dungeon:
         :param y: y coordinate
         :return: (MonsterMeta) monster name, message and coordinates
         """
-        return Dungeon.field[x][y].meta()
+        return Game.field[x][y].meta()
 
     @staticmethod
     def change_hero_pos(hero: Optional[Client], way: Way) -> str:
@@ -217,13 +216,13 @@ class Dungeon:
         :return: (str) message regarding hero's movement and possible encounter with monster
         """
 
-        x, y = Dungeon.ways[way]
+        x, y = Game.ways[way]
 
         i = hero.pos[0] = (x + hero.pos[0]) % 10
         j = hero.pos[1] = (y + hero.pos[1]) % 10
 
-        if Dungeon.field[i][j]:
-            name, text, _ = Dungeon.encounter(i, j)
+        if Game.field[i][j]:
+            name, text, _ = Game.encounter(i, j)
             return i, j, "\n" + cs.cowsay(message=text, cow=name)
 
         return i, j, ""
@@ -246,11 +245,11 @@ class Dungeon:
         }
 
         x, y = pos
-        if not Dungeon.field[x][y]:
+        if not Game.field[x][y]:
             data["here"] = False
             return data
 
-        monster = Dungeon.field[x][y]
+        monster = Game.field[x][y]
 
         if monster.name != name:
             return data
@@ -259,8 +258,8 @@ class Dungeon:
         data["hp"] = monster.hp
         data["attack"] = True
 
-        if monster.hp < 0:
-            Dungeon.field[x][y] = None
+        if monster.hp <= 0:
+            Game.field[x][y] = None
             Monster.pop(name)
             data["died"] = True
         return data
@@ -274,9 +273,9 @@ def monster_moving(delay: int) -> None:
     :return: None
     """
 
-    dungeon = Dungeon.field
+    game = Game.field
     monsters = Monster.monsters
-    ways = Dungeon.ways
+    ways = Game.ways
 
     while True:
         if monsters:
@@ -287,10 +286,10 @@ def monster_moving(delay: int) -> None:
             _x, _y = ways[move][0], ways[move][1]
             new_x, new_y = (x + _x) % 10, (y + _y) % 10
 
-            if not dungeon[new_x][new_y]:
+            if not game[new_x][new_y]:
                 monster.coords = (new_x, new_y)
-                dungeon[new_x][new_y] = monster
-                dungeon[x][y] = None
+                game[new_x][new_y] = monster
+                game[x][y] = None
 
                 monster_name, text, *args = monster.meta()
                 hello_msg = cs.cowsay(message=text, cow=monster_name)
@@ -348,7 +347,7 @@ async def start_server(
         msg = shlex.split(data.decode().strip())
         match msg:
             case ["move", direction]:
-                new_x, new_y, monster_msg = Dungeon.change_hero_pos(client, direction)
+                new_x, new_y, monster_msg = Game.change_hero_pos(client, direction)
                 ans = (f"Moved to ({new_x}, {new_y})")
                 writer.write((ans + monster_msg).encode())
                 await writer.drain()
@@ -365,7 +364,7 @@ async def start_server(
                     monster_name, monster_msg, monster_hp, monster_coords
                 )
 
-                *tmp, replace = Dungeon.add_monster(new_monster)
+                *tmp, replace = Game.add_monster(new_monster)
 
                 for name, clt in Client.client_list.items():
                     if clt is client:
@@ -376,21 +375,18 @@ async def start_server(
                         clt.writer.write(ans.encode())
 
             case ["attack", *args]:
-                data = Dungeon.attack(client.pos, args[0], int(args[1]))
+                data = Game.attack(client.pos, args[0], int(args[1]))
                 if not data["here"]:
-                    client.locale.install()
                     ans = ("No monster here")
                     writer.write(ans.encode())
                     await writer.drain()
                 elif data["here"] and not data["attack"]:
-                    client.locale.install()
                     ans = ("No {} here.").format(data["attack_name"])
                     writer.write(ans.encode())
                     await writer.drain()
                 else:
                     for clt_name, clt in Client.client_list.items():
                         if clt is client:
-                            client.locale.install()
                             if not data["died"]:
                                 ans = ("{} now has {} hp").format(
                                     data["attack_name"], data["hp"]
@@ -400,7 +396,6 @@ async def start_server(
                             writer.write(ans.encode())
                             await writer.drain()
                         else:
-                            clt.locale.install()
                             if not data["died"]:
                                 ans = ("{} attack {}.\n{} now has {} hp").format(
                                     client.name,
@@ -430,7 +425,6 @@ async def start_server(
 
     for clt_name, clt in Client.client_list.items():
         if not clt is client:
-            clt.locale.install()
             ans = (f"{login} disconnect.")
             clt.writer.write(ans.encode())
             await clt.writer.drain()

@@ -192,4 +192,4 @@ def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect(("localhost", 1337))
         s.send(f"{sys.argv[1]}\n".encode())
-        main(s)
+        start(s)

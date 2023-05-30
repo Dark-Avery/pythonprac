@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: MooServer
+Version: 1.0
+Summary: Server package for MOOD project
+Author-email: "Igor A. Zyanchurin" <ingv0rr@yandex.com>
+Keywords: python-cowsay,project,example
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst

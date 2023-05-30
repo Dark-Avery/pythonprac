@@ -14,12 +14,12 @@ class Test_Client(TestCase):
         self.dungeon = client.Dungeon(self.socket)
 
     def test_1(self):
-        self.dungeon.onecmd("up")
-        self.assertEqual(self.res[0].decode(), "move up\n")
+        self.dungeon.onecmd("down")
+        self.assertEqual(self.res[0].decode(), "move down\n")
 
     def test_2(self):
-        self.dungeon.onecmd("addmon default hello hi coords 1 1 hp 15")
-        self.assertEqual(self.res[0].decode(), "addmon default hello hi coords 1 1 hp 15\n")
+        self.dungeon.onecmd("addmon dragon hello haha coords 0 1 hp 150")
+        self.assertEqual(self.res[0].decode(), "addmon dragon hello haha coords 0 1 hp 150\n")
 
     def test_3(self):
         self.dungeon.onecmd("attack default with axe")

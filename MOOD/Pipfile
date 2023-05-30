@@ -15,6 +15,7 @@ coverage = "*"
 setuptools = "*"
 pydocstyle = "*"
 flake8 = "*"
+python-cowsay = "*"
 
 [requires]
 python_version = "3.11"
